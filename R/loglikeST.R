@@ -9,7 +9,7 @@
 ##' uses an optimised version of the log-likelihood, while \code{loglikeSTnaive}
 ##' uses the naive (slow) version and is included mainly for testing and speed
 ##' checks.
-##' 
+##'
 ##' @title Compute the Log-likelihood for the Spatio-Temporal Model
 ##' @param x Point at which to compute the log-likelihood, should be only
 ##'   \emph{log}-covariance parameters if \code{type=c("p","r")} and
@@ -25,17 +25,17 @@
 ##' @param x.fixed Parameters to keep fixed, \code{NA} values in this vector is
 ##'   replaced by values from \code{x} and the result is used as \code{x}, ie. \cr
 ##'   \code{ x.fixed[ is.na(x.fixed) ] <- x} \cr \code{ x <- x.fixed }.
-##' 
-##' @return Returns the log-likelihood of the spatio temporal model. 
-##' 
+##'
+##' @return Returns the log-likelihood of the spatio temporal model.
+##'
 ##' @section Warning: \code{loglikeSTnaive} may take long to run. However for
 ##'   some problems with many locations and short time series
 ##'   \code{loglikeSTnaive} could be faster than \code{loglikeST}.
-##' 
+##'
 ##' @example Rd_examples/Ex_loglikeST.R
 ##'
-##' @author Johan Lindström
-##' 
+##' @author Johan Lindstr?m
+##'
 ##' @family STmodel functions
 ##' @family likelihood functions
 ##' @family estimation functions
@@ -47,14 +47,14 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
   type <- tolower(type)
   ##check if type is valid and if x.fixed should be expanded
   x <- stCheckLoglikeIn(x, x.fixed, type)
-    
+
   ##if x is null or contains NA
   if( is.null(x) || any(is.na(x)) ){
     ##return the expected variable names
     return( loglikeSTnames(STmodel, all=(type=="f")) )
   }
   ##else, calculate loglikelihood
-  
+
   ##first figure out a bunch of dimensions
   dimensions <- loglikeSTdim(STmodel)
   ##check parameter sizes
@@ -62,7 +62,7 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
      (type!="f" && length(x)!=dimensions$nparam.cov)){
     stop("Number of parameters, length(x), incorrect.")
   }
-  
+
   ##extract parameters from x
   tmp <- loglikeSTgetPars(x, STmodel)
   if(type=="f"){
@@ -99,11 +99,11 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
   ##storing in-place to conserve memory
   sigma.B <- try( makeCholBlock(sigma.B, n.blocks=dimensions$m),
                  silent=TRUE)
-  if(class(sigma.B)=="try-error"){
+  if(class(sigma.B)[1]=="try-error"){
     return(-.Machine$double.xmax)
   }
   sigma.nu <- try( chol(sigma.nu), silent=TRUE)
-  if(class(sigma.nu)=="try-error"){
+  if(class(sigma.nu)[1]=="try-error"){
     return(-.Machine$double.xmax)
   }
   ##loglikelihood calculations follow:
@@ -119,7 +119,7 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
   sigma.nu <- chol2inv(sigma.nu)
   ##inv(sigma.nu) * Y
   i.sR.Y <- as.matrix(sigma.nu %*% Y)
-  
+
   if(type=="f"){
     ##calculate inv(matrix)*mu
     ##inv(sigma.B) * mu.B
@@ -144,7 +144,7 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
                            n.loc=dimensions$n.obs)
     }
   }##if(type=="f"){...}else{...}
-  
+
   ##inv(sigma.B|Y) = F'*inv(sigma.nu)*F + inv(sigma.B)
   sigma.B.Y <- as.matrix( t(F) %*% sigma.nu %*% F) + sigma.B
   ##calculate cholesky factor of inv(sigma.B|Y)
@@ -194,14 +194,14 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
     ##Y'*sigma_hat*Y
     Y.sigma.hat.Y <- dotProd(Y,i.sR.Y) - norm2(Y.hat) - norm2(Y.hat.2)
     l <- l - Y.sigma.hat.Y/2
-  
+
     ##parts relevant only with spatio-temporal model
     if(dimensions$L!=0){
       ## X' * inv(sigma.B) * sigma.B.Y * F' * inv(sigma.nu) * M
       M.hat.2 <- t(sigma.B.Y.iS.X) %*% F.i.sR.M
       ## chol(inv(sigma.alpha.Y))^-T * M.hat.2
       M.hat.2 <- solveTriBlock(i.sigma.alpha.Y, M.hat.2, transpose=TRUE)
-    
+
       Y.sigma.hat.M <- (t(Y) %*% i.sR.M - t(Y.hat) %*% M.hat -
                         t(Y.hat.2) %*% M.hat.2)
       Y.sigma.hat.M <- t(Y.sigma.hat.M)
@@ -213,7 +213,7 @@ loglikeST <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
         return(-.Machine$double.xmax)
       }
       ##-log(det( M.sigma.hat.M )^.5)
-      if(type=="r"){ 
+      if(type=="r"){
         l <- l - sumLogDiag( M.sigma.hat.M )
       }
 
@@ -246,14 +246,14 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
   type <- tolower(type)
   ##check if type is valid and if x.fixed should be expanded
   x <- stCheckLoglikeIn(x, x.fixed, type)
-  
+
   ##if x is null or contains NA
   if( is.null(x) || any(is.na(x)) ){
     ##return the expected variable names
     return( loglikeSTnames(STmodel, all=(type=="f")) )
   }
   ##else, calculate loglikelihood
-  
+
   ##first figure out a bunch of dimensions
   dimensions <- loglikeSTdim(STmodel)
   ##check parameter sizes
@@ -261,7 +261,7 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
      (type!="f" && length(x)!=dimensions$nparam.cov)){
     stop("Number of parameters, length(x), incorrect.")
   }
-    
+
   ##extract parameters from x
   tmp <- loglikeSTgetPars(x, STmodel)
   if(type=="f"){
@@ -284,7 +284,7 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
       Y <- Y - STmodel$ST %*% gamma
     }
   }##if( type=="f" )
-  
+
   ##create covariance matrices, beta-field
   sigma.B.full <- makeSigmaB(cov.pars.beta$pars, dist = STmodel$D.beta,
                              type = STmodel$cov.beta$covf,
@@ -299,7 +299,7 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
                           blocks1 = STmodel$nt, ind1 = STmodel$obs$idx,
                           sparse=FALSE)
 
-  
+
   ##Total covariance matrix
   sigma.nu <- sigma.nu + as.matrix(sigma.B.full)
   ##calculate (block) cholesky factor of the matrices
@@ -324,7 +324,7 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
     if( dimensions$L!=0 ){
       Ftmp <- cbind(Ftmp, STmodel$ST)
     }
-  
+
     ##calculate inv(R)'*Ftmp
     Ftmp <- solveTriBlock(sigma.nu, Ftmp, transpose=TRUE)
     ##calculate Ftmp'*inv(Sigma)*Y
@@ -345,10 +345,10 @@ loglikeSTnaive <- function(x=NULL, STmodel, type="p", x.fixed=NULL){
     ##+1/2 FY' * inv(sigma.alt) * FY
     l <- l + norm2(FY)/2
   }##if(type!="f")
-  
+
   ##ensure that l is treated as a double value (and not a sparse matrix)
   l <- as.double(l)
-  
+
   ##add safe guard (infinite or nan results almost always due to
   ##matrix inprecision, lets return a very small value)
   if( !is.finite(l) )
